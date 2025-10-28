@@ -27,11 +27,15 @@ export const getAllUsersForNewsEmail = async (): Promise<
 
     return users
       .filter((user) => user.email && user.name)
-      .map((user) => ({
-        id: user.id || user._id?.toString?.() || "",
-        email: user.email,
-        name: user.name,
-      }));
+      .map((user) => {
+        const id =
+          (typeof user.id === "string" && user.id) ||
+          (typeof user._id?.toString === "function" ? user._id.toString() : "");
+        return id
+          ? { id, email: String(user.email), name: String(user.name) }
+          : null;
+      })
+      .filter(Boolean) as UserForNewsEmail[];
   } catch (e) {
     console.error("Error fetching users for news email:", e);
     return []; // ✅ Always return an array on failure
